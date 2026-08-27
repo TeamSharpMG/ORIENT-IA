@@ -8,6 +8,9 @@ de ses recommandations.
 > ORIENT'IA constitue un outil d'aide à l'orientation. Ses recommandations ne remplacent ni l'avis
 > d'un conseiller pédagogique ni une décision officielle d'admission.
 
+# Video de presentation
+-> https://youtu.be/3pg9Fjm7K5I
+
 ## Structure du dépôt
 
 ```
@@ -35,6 +38,7 @@ docs/                # registre des sources, registre de collecte, note de limit
 
 Prérequis : [uv](https://docs.astral.sh/uv/), Python ≥ 3.14.
 
+Telecherger les dependances:
 ```bash
 uv sync
 ```
@@ -96,6 +100,8 @@ tail -f logs/orientia.jsonl | python3 -m json.tool
 Voir `src/orientia_rag/observability.py`.
 
 ## Documentation complémentaire
+Il est conseille d'utiliser VSCode et d'installer l'extension "md" (par nettrash).
+Utiliser l'extension md pour generer un pdf issu des suivantes documentations. `Ctrl-Shift-P` -> taper `md` -> md:Export as PDF
 
 - [`docs/schema_architecture.md`](docs/schema_architecture.md) — schéma d'architecture (diagramme Mermaid)
 - [`docs/registre_sources.md`](docs/registre_sources.md) — traçabilité du corpus documentaire
