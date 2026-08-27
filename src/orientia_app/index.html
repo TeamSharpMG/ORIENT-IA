@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ORIENT'IA</title>
+<link rel="icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #101318;
+    --sidebar-bg: #111419;
+    --panel: #171b21;
+    --panel-2: #15191f;
+    --panel-3: #191d24;
+    --field-bg: #111419;
+    --border: #272b33;
+    --border-2: #343944;
+    --text: #f4f4f5;
+    --text-strong: #f3f4f6;
+    --muted: #9ca3af;
+    --muted-2: #8b929e;
+    --accent: #34d399;
+    --accent-mid: #10b981;
+    --accent-dark: #059669;
+    --accent-contrast: #ffffff;
+    --accent-soft: #12352b;
+    --ring: rgba(16, 185, 129, 0.18);
+    --user-bubble: #46e598;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  button { font: inherit; cursor: pointer; color: inherit; }
+  input, textarea, select { font: inherit; }
+  .app { display: flex; width: 100%; height: 100vh; overflow: hidden; background: var(--bg); }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 288px; flex-shrink: 0; height: 100vh;
+    display: flex; flex-direction: column;
+    padding: 22px 12px 14px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    transition: width 0.22s ease, padding 0.22s ease, opacity 0.18s ease;
+  }
+  .sidebar.hide { width: 0; padding-left: 0; padding-right: 0; opacity: 0; border-right: none; overflow: hidden; }
+  .sidebar-header { display: flex; align-items: center; padding: 0 8px 22px; }
+  .brand { display: flex; align-items: center; gap: 11px; font-size: 19px; font-weight: 650; letter-spacing: -0.01em; }
+  .brand-logo {
+    width: 34px; height: 34px; flex-shrink: 0;
+    border-radius: 9px;
+    padding: 4px;
+    background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .new-chat-button {
+    width: 100%; height: 50px;
+    display: flex; align-items: center; gap: 11px;
+    padding: 0 15px; margin-bottom: 14px;
+    border-radius: 10px; border: none;
+    color: var(--text-strong); background: #242830;
+    text-align: left; font-size: 14.5px;
+    transition: background 0.15s;
+  }
+  .new-chat-button:hover { background: #2c313a; }
+  .new-chat-button .icon-plus { margin-left: auto; font-size: 19px; opacity: 0.85; }
+  .sidebar-footer {
+    margin-top: auto; padding: 12px 10px 2px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--muted-2); line-height: 1.55;
+  }
+  .sidebar-footer .session-tag { font-variant-numeric: tabular-nums; opacity: 0.85; margin-top: 4px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 25; }
+
+  /* ---------- Main / topbar ---------- */
+  .main { position: relative; flex: 1; min-width: 0; height: 100vh; display: flex; flex-direction: column;
+    background: radial-gradient(circle at 50% 20%, rgba(52,211,153,0.05), transparent 40%), var(--bg); }
+  .topbar {
+    position: absolute; top: 18px; left: 0; right: 20px; z-index: 6;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sidebar-toggle {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border-2);
+    border-top-right-radius: 10px; border-bottom-right-radius: 10px;
+    color: var(--muted); background: var(--panel-2);
+    font-size: 15px;
+    transition: background 0.15s;
+  }
+  .sidebar-toggle:hover { background: #22262e; }
+  .ispm-brand { display: flex; align-items: center; }
+  .ispm-logo { width: 32px; height: 32px; object-fit: contain; border-radius: 7px; background: #fff; padding: 3px; }
+
+  .content { flex: 1; overflow-y: auto; padding-top: 88px; }
+
+  /* ---------- Welcome ---------- */
+  .welcome { width: min(760px, calc(100% - 40px)); margin: 0 auto; text-align: center; padding-bottom: 40px; }
+  .llm-logo {
+    width: 76px; height: 76px; margin: 0 auto 22px;
+    border-radius: 50%; padding: 12px;
+    background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 32px rgba(52, 211, 153, 0.28);
+  }
+  .llm-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .welcome h1 { margin: 0; color: var(--text-strong); font-size: clamp(24px, 3vw, 34px); font-weight: 650; letter-spacing: -0.02em; }
+  .welcome p { margin: 14px auto 0; max-width: 520px; color: var(--muted); font-size: 15.5px; line-height: 1.6; }
+
+  /* ---------- Preset quick-fill (inside profile modal) ---------- */
+  .preset-row { padding: 2px 28px 4px; }
+  .preset-row-label {
+    display: block; margin: 2px 0 10px; color: #6b7280;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .preset-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+  .preset-card {
+    flex: 1 1 160px; min-width: 150px;
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 14px; border: 1px solid var(--border-2); border-radius: 12px;
+    color: var(--text); background: var(--field-bg); text-align: left;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  }
+  .preset-card:hover { background: var(--panel); border-color: #454b57; transform: translateY(-1px); }
+  .preset-card strong { color: var(--text-strong); font-size: 13px; font-weight: 600; }
+  .preset-card span { color: var(--muted-2); font-size: 11px; line-height: 1.4; }
+
+  /* ---------- Messages ---------- */
+  .chat-container { width: min(880px, calc(100% - 48px)); margin: 0 auto; padding: 4px 0 220px; display: flex; flex-direction: column; gap: 26px; }
+  .message-row { width: 100%; display: flex; gap: 13px; animation: msgIn 0.2s ease-out; }
+  .message-row.user { justify-content: flex-end; }
+  .message-row.assistant { justify-content: flex-start; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .message-avatar {
+    width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; padding: 3px;
+    display: flex; align-items: center; justify-content: center;
+    background: #ffffff;
+  }
+  .message-avatar img { width: 100%; height: 100%; object-fit: contain; }
+  .message { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .message-row.user .message { align-items: flex-end; }
+  .message-row.assistant .message { width: 100%; }
+  .message-role { color: var(--muted-2); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+  .message-content { min-width: 0; border-radius: 18px; color: var(--text); font-size: 14.5px; line-height: 1.6; }
+  .message-row.user .message-content {
+    max-width: 34rem; padding: 10px 16px; color: #06170c; background: var(--user-bubble);
+    overflow-wrap: break-word; word-break: break-word;
+  }
+  .message-content :is(p) { margin: 0 0 10px; }
+  .message-content :last-child { margin-bottom: 0; }
+  .message-content h1, .message-content h2, .message-content h3 { margin: 14px 0 8px; color: var(--text-strong); font-weight: 650; }
+  .message-content h1:first-child, .message-content h2:first-child, .message-content h3:first-child { margin-top: 0; }
+  .message-content h3 { font-size: 1.05em; }
+  .message-content ul, .message-content ol { margin: 4px 0 10px; padding-left: 22px; }
+  .message-content li { margin-bottom: 5px; }
+  .message-content strong { font-weight: 700; color: var(--text-strong); }
+  .message-row.user .message-content strong { color: #04120a; }
+  .message-content code {
+    background: rgba(52,211,153,0.14); padding: 1px 6px; border-radius: 5px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.87em;
+  }
+
+  .typing { display: inline-flex; gap: 9px; align-items: center; padding: 6px 0; color: var(--muted-2); font-size: 13.5px; }
+  .typing-dots { display: inline-flex; gap: 5px; align-items: center; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted-2); animation: bounce 1.2s infinite ease-in-out; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  /* ---------- Loading spinner ---------- */
+  .spinner {
+    width: 15px; height: 15px; flex-shrink: 0; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Composer ---------- */
+  .container-all-composer[hidden] { display: none; }
+  .container-all-composer {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center;
+    padding: 10px 20px 22px;
+    background: linear-gradient(to top, var(--bg) 55%, transparent);
+  }
+  .composer-container { width: min(880px, 100%); }
+  .composer {
+    width: 100%; padding: 12px 12px 12px 18px;
+    border: 1px solid var(--border-2); border-radius: 20px;
+    background: var(--panel-3);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    display: flex; align-items: flex-end; gap: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .composer:focus-within { border-color: var(--accent-mid); box-shadow: 0 0 0 3px var(--ring); }
+  .composer textarea {
+    flex: 1; min-height: 26px; max-height: 160px; resize: none;
+    border: none; outline: none; color: var(--text-strong); background: transparent;
+    font-size: 14.5px; line-height: 1.5; padding: 5px 0;
+  }
+  .composer textarea::placeholder { color: var(--muted-2); }
+  .send-button {
+    width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); background: #353a42;
+    transition: background 0.15s, color 0.15s, transform 0.08s;
+  }
+  .send-button.enabled { color: #06170c; background: var(--accent); }
+  .send-button.enabled:hover { background: var(--accent-mid); }
+  .send-button:active:not(:disabled) { transform: scale(0.92); }
+  .send-button:disabled { cursor: default; }
+  .send-button .spinner { border-color: rgba(156,163,175,0.35); border-top-color: var(--muted); }
+  .composer textarea:disabled { opacity: 0.6; }
+  .disclaimer { margin: 12px 0 0; color: #6b7280; font-size: 11.5px; text-align: center; }
+
+  /* ---------- Profile modal ---------- */
+  .profile-overlay[hidden] { display: none; }
+  .profile-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: rgba(8, 9, 12, 0.6);
+    backdrop-filter: blur(6px);
+  }
+  .profile-modal {
+    width: min(700px, 100%); max-height: 90vh;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border-2); border-radius: 20px;
+    background: var(--panel);
+    box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+    animation: profileAppear 0.18s ease-out;
+    overflow: hidden;
+  }
+  @keyframes profileAppear { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .profile-header { padding: 24px 28px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .profile-header h2 { margin: 0; color: var(--text-strong); font-size: 21px; font-weight: 650; }
+  .profile-header p { max-width: 540px; margin: 8px 0 0; color: var(--muted-2); font-size: 13px; line-height: 1.55; }
+  .profile-form { padding: 22px 28px; overflow-y: auto; }
+  .form-group { margin-bottom: 22px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-group label { display: block; margin-bottom: 9px; color: #e5e7eb; font-size: 13.5px; font-weight: 600; }
+  .form-hint { display: block; margin-top: 6px; color: #6b7280; font-size: 11.5px; }
+  .form-group select {
+    width: 100%; height: 46px; padding: 0 13px;
+    border: 1px solid var(--border-2); border-radius: 10px;
+    outline: none; color: #e5e7eb; background: var(--field-bg);
+  }
+  .form-group select:focus { border-color: var(--accent-mid); }
+
+  .trait-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .trait-chip {
+    flex: 0 0 auto; white-space: nowrap;
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 9px 14px; border: 1px solid var(--border-2); border-radius: 12px;
+    color: var(--muted); background: var(--field-bg); text-align: left;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+  .trait-chip strong { font-size: 13px; color: inherit; }
+  .trait-chip span { font-size: 10.5px; color: #6b7280; }
+  .trait-chip:hover { border-color: var(--accent-mid); }
+  .trait-chip.selected { border-color: var(--accent-mid); color: #d1fae5; background: var(--accent-soft); }
+  .trait-chip.selected span { color: #6ee7b7; }
+
+  .autocomplete { position: relative; width: 100%; }
+  .autocomplete-input {
+    width: 100%; min-height: 46px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    padding: 7px 10px; border: 1px solid var(--border-2); border-radius: 10px;
+    background: var(--field-bg); cursor: text;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .autocomplete-input:focus-within { border-color: var(--accent-mid); box-shadow: 0 0 0 2px var(--ring); }
+  .autocomplete-input input {
+    flex: 1; min-width: 120px; height: 28px; padding: 0 4px;
+    border: none; outline: none; color: #e5e7eb; background: transparent; font-size: 13.5px;
+  }
+  .autocomplete-input input::placeholder { color: #6b7280; }
+  .autocomplete-chip {
+    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    padding: 5px 8px; border-radius: 7px; color: #d1fae5; background: var(--accent-soft);
+    font-size: 12px; white-space: nowrap;
+  }
+  .autocomplete-chip button { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+    border: none; color: #6ee7b7; background: transparent; font-size: 14px; line-height: 1; }
+  .autocomplete-chip button:hover { color: white; }
+  .autocomplete-dropdown[hidden] { display: none; }
+  .autocomplete-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 60;
+    max-height: 210px; padding: 6px; overflow-y: auto;
+    border: 1px solid var(--border-2); border-radius: 11px;
+    background: var(--panel); box-shadow: 0 14px 38px rgba(0,0,0,0.4);
+  }
+  .autocomplete-option {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 11px; border: none; border-radius: 7px;
+    color: #d1d5db; background: transparent; text-align: left; font-size: 12.5px;
+  }
+  .autocomplete-option:hover { color: #ecfdf5; background: var(--accent-soft); }
+  .autocomplete-option .plus { color: var(--accent); font-size: 16px; }
+  .autocomplete-option.create-option { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 11px; }
+
+  .profile-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 16px 28px; border-top: 1px solid var(--border); background: var(--panel-2); flex-shrink: 0;
+  }
+  .profile-footer .validity-hint { font-size: 11.5px; color: #6b7280; }
+  .analyze-button {
+    height: 44px; padding: 0 20px; border: none; border-radius: 10px;
+    color: white; background: var(--accent-mid); font-weight: 600; font-size: 13.5px;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .analyze-button:hover:not(:disabled) { background: var(--accent-dark); }
+  .analyze-button:disabled { opacity: 0.4; cursor: not-allowed; background: #374151; color: #9ca3af; }
+  .analyze-button.loading { opacity: 1; cursor: wait; background: var(--accent-dark); color: white; }
+  .profile-form.form-disabled { opacity: 0.55; pointer-events: none; }
+  .profile-error[hidden] { display: none; }
+  .profile-error {
+    margin: 0; padding: 11px 28px 0; color: var(--danger); font-size: 12.5px; line-height: 1.5;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 760px) {
+    .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; transform: translateX(0); }
+    .sidebar.hide { transform: translateX(-100%); width: 288px; padding: 22px 12px 14px; opacity: 1; border-right: 1px solid var(--border); }
+    .sidebar:not(.hide) ~ .sidebar-overlay { display: block; }
+    .content { padding-top: 76px; }
+    .profile-header, .preset-row, .profile-form, .profile-footer { padding-left: 18px; padding-right: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-logo"><img src="/logo.png" alt="ISPM"></span>
+        <span>ORIENT'IA</span>
+      </div>
+    </div>
+    <button type="button" class="new-chat-button" id="new-chat-btn">
+      <span>Nouvelle discussion</span>
+      <span class="icon-plus">+</span>
+    </button>
+    <div class="sidebar-footer">
+      <p>Assistant d'orientation ISPM — RAG + recommandation ML.</p>
+      <p class="session-tag" id="session-tag">Aucune session active</p>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" title="Afficher/masquer la barre latérale">‹‹</button>
+      <div class="ispm-brand"><img src="/logo.png" alt="ISPM" class="ispm-logo"></div>
+    </header>
+
+    <section class="content" id="content">
+      <div class="welcome" id="welcome">
+        <div class="llm-logo"><img src="/logo.png" alt="ISPM"></div>
+        <h1>Votre orientation personnalisée</h1>
+        <p>Après analyse de ton profil — série, matières préférées, personnalité et centres d'intérêt — ORIENT'IA identifie les 3 filières de l'ISPM qui te correspondent le mieux, et t'explique pourquoi.</p>
+      </div>
+
+      <div class="chat-container" id="chat-container" hidden></div>
+    </section>
+
+    <div class="container-all-composer" id="composer-wrap" hidden>
+      <div class="composer-container">
+        <form class="composer" id="chat-form">
+          <textarea id="chat-input" rows="1" placeholder="Pose ta question à ORIENT'IA..."></textarea>
+          <button type="submit" class="send-button" id="send-btn" aria-label="Envoyer">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </form>
+        <p class="disclaimer">ORIENT'IA constitue un outil d'aide à l'orientation. Ses recommandations ne remplacent ni l'avis d'un conseiller pédagogique ni une décision officielle d'admission.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ================= PROFIL (modal) ================= -->
+<div class="profile-overlay" id="profile-overlay">
+  <div class="profile-modal">
+    <div class="profile-header">
+      <h2>Commençons par mieux te connaître</h2>
+      <p>Avant de te proposer une orientation, j'ai besoin de quelques informations sur ton profil : elles me permettent de comprendre tes intérêts, ta personnalité et le type de formation qui pourrait te correspondre.</p>
+      <p class="form-hint" style="margin-top: 8px;">Le premier lancement peut prendre jusqu'à une minute (chargement du modèle d'IA) — c'est normal.</p>
+    </div>
+
+    <div class="preset-row">
+      <span class="preset-row-label">Remplir rapidement</span>
+      <div class="preset-cards" id="suggestions">
+        <button type="button" class="preset-card" data-preset="tech">
+          <strong>Profil tech</strong>
+          <span>Série D, maths, jeux vidéo &amp; robotique, Investigateur/Réaliste</span>
+        </button>
+        <button type="button" class="preset-card" data-preset="business">
+          <strong>Profil affaires</strong>
+          <span>Série C, économie, commerce &amp; négociation, Entreprenant/Conventionnel</span>
+        </button>
+        <button type="button" class="preset-card" data-preset="creatif">
+          <strong>Profil créatif</strong>
+          <span>Série littéraire, langues, lecture &amp; écriture, Artistique/Social</span>
+        </button>
+      </div>
+    </div>
+
+    <form class="profile-form" id="profile-form">
+      <div class="form-group">
+        <label for="serie_bac">Série du baccalauréat</label>
+        <select id="serie_bac" required>
+          <option value="" disabled selected>Sélectionne ta série</option>
+          <option>A1</option><option>A2</option><option>C</option><option>D</option>
+          <option>S</option><option>TGI</option><option value="Techniques agricoles">Techniques agricoles</option>
+          <option value="Techniques du génie civil">Techniques du génie civil</option><option>Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Matière(s) préférée(s)</label>
+        <div id="subjects-field"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Traits de personnalité (RIASEC)</label>
+        <div class="trait-grid" id="traits-field"></div>
+        <span class="form-hint">Choisis toi-même ceux qui te correspondent — jamais déduits de ta façon d'écrire.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Centres d'intérêt ou loisirs</label>
+        <div id="interests-field"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="domaine">Domaine qui t'attire <span class="form-hint" style="display:inline">(optionnel)</span></label>
+        <select id="domaine">
+          <option value="">Aucune préférence particulière</option>
+          <option>Informatique</option><option>Intelligence artificielle</option>
+          <option>Réseaux et télécommunications</option><option>Génie logiciel</option>
+          <option>Électronique</option><option>Génie civil</option><option>Agronomie</option>
+          <option>Gestion</option><option>Finance</option><option>Commerce</option>
+          <option>Tourisme</option>
+        </select>
+      </div>
+    </form>
+
+    <p class="profile-error" id="profile-error" hidden></p>
+
+    <div class="profile-footer">
+      <span class="validity-hint" id="validity-hint">Série, matière, un trait et un intérêt minimum.</span>
+      <button type="button" class="analyze-button" id="analyze-btn" disabled>✦ Analyser mon profil</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const TRAITS = [
+    { value: "Réaliste", desc: "Manipuler, construire, réparer" },
+    { value: "Investigateur", desc: "Comprendre, analyser, résoudre" },
+    { value: "Artistique", desc: "Créer, imaginer, s'exprimer" },
+    { value: "Social", desc: "Aider, enseigner, accompagner" },
+    { value: "Entreprenant", desc: "Diriger, convaincre, négocier" },
+    { value: "Conventionnel", desc: "Organiser, gérer, structurer" },
+  ];
+  const SUBJECTS = ["Mathématiques", "Physique-Chimie", "Informatique", "Français", "Anglais", "SVT", "Économie", "Gestion", "Histoire-Géographie", "Philosophie"];
+  const INTERESTS = ["Programmation", "Robotique", "Jeux vidéo", "Intelligence artificielle", "Entrepreneuriat", "Sciences", "Communication", "Commerce", "Design", "Musique", "Sport", "Lecture", "Agriculture", "Tourisme"];
+
+  const PRESETS = {
+    tech: { serie: "D", subjects: ["Mathématiques"], traits: ["Investigateur", "Réaliste"], interests: ["Programmation", "Robotique", "Jeux vidéo"], domaine: "Informatique" },
+    business: { serie: "C", subjects: ["Économie", "Gestion"], traits: ["Entreprenant", "Conventionnel"], interests: ["Commerce", "Entrepreneuriat"], domaine: "Commerce" },
+    creatif: { serie: "A2", subjects: ["Français", "Anglais"], traits: ["Artistique", "Social"], interests: ["Lecture", "Design", "Musique"], domaine: "" },
+  };
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // -------- Autocomplete multi-select (chips dans le champ + dropdown) --------
+  function createAutocomplete(container, options, placeholder, allowCustom, initial) {
+    let selected = (initial || []).slice();
+    const root = document.createElement("div");
+    root.className = "autocomplete";
+    const inputWrap = document.createElement("div");
+    inputWrap.className = "autocomplete-input";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = placeholder;
+    const dropdown = document.createElement("div");
+    dropdown.className = "autocomplete-dropdown";
+    dropdown.hidden = true;
+
+    function renderChips() {
+      inputWrap.querySelectorAll(".autocomplete-chip").forEach((el) => el.remove());
+      selected.forEach((val) => {
+        const chip = document.createElement("span");
+        chip.className = "autocomplete-chip";
+        const label = document.createElement("span");
+        label.textContent = val;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "×";
+        btn.addEventListener("click", () => {
+          selected = selected.filter((v) => v !== val);
+          renderChips();
+          onChange && onChange();
+        });
+        chip.append(label, btn);
+        inputWrap.insertBefore(chip, input);
+      });
+    }
+
+    function renderDropdown() {
+      const query = input.value.trim().toLowerCase();
+      const filtered = options.filter((o) => !selected.includes(o) && o.toLowerCase().includes(query));
+      dropdown.innerHTML = "";
+      filtered.slice(0, 8).forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "autocomplete-option";
+        btn.innerHTML = `<span>${escapeHtml(opt)}</span><span class="plus">+</span>`;
+        btn.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          selected.push(opt);
+          input.value = "";
+          renderChips();
+          renderDropdown();
+          onChange && onChange();
+        });
+        dropdown.appendChild(btn);
+      });
+      const trimmed = input.value.trim();
+      if (allowCustom && trimmed && !options.some((o) => o.toLowerCase() === trimmed.toLowerCase()) && !selected.includes(trimmed)) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "autocomplete-option create-option";
+        btn.innerHTML = `<span>Ajouter "${escapeHtml(trimmed)}"</span><span class="plus">+</span>`;
+        btn.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          selected.push(trimmed);
+          input.value = "";
+          renderChips();
+          renderDropdown();
+          onChange && onChange();
+        });
+        dropdown.appendChild(btn);
+      }
+      dropdown.hidden = dropdown.children.length === 0;
+    }
+
+    input.addEventListener("input", renderDropdown);
+    input.addEventListener("focus", renderDropdown);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const trimmed = input.value.trim();
+        if (allowCustom && trimmed && !selected.includes(trimmed)) {
+          selected.push(trimmed);
+          input.value = "";
+          renderChips();
+          renderDropdown();
+          onChange && onChange();
+        }
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (!root.contains(e.target)) dropdown.hidden = true;
+    });
+
+    inputWrap.appendChild(input);
+    root.append(inputWrap, dropdown);
+    container.appendChild(root);
+    renderChips();
+
+    let onChange = null;
+    return {
+      getValues: () => selected.slice(),
+      setValues: (vals) => { selected = vals.slice(); renderChips(); },
+      onChange: (fn) => { onChange = fn; },
+    };
+  }
+
+  const subjectsAC = createAutocomplete(document.getElementById("subjects-field"), SUBJECTS, "Rechercher une matière...", false, []);
+  const interestsAC = createAutocomplete(document.getElementById("interests-field"), INTERESTS, "Rechercher un centre d'intérêt...", true, []);
+
+  // -------- Traits RIASEC (chips à bascule) --------
+  const traitsField = document.getElementById("traits-field");
+  let selectedTraits = [];
+  TRAITS.forEach((t) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "trait-chip";
+    btn.dataset.value = t.value;
+    btn.innerHTML = `<strong>${t.value}</strong><span>${t.desc}</span>`;
+    btn.addEventListener("click", () => {
+      const idx = selectedTraits.indexOf(t.value);
+      if (idx === -1) selectedTraits.push(t.value);
+      else selectedTraits.splice(idx, 1);
+      btn.classList.toggle("selected");
+      updateValidity();
+    });
+    traitsField.appendChild(btn);
+  });
+
+  const serieSelect = document.getElementById("serie_bac");
+  const domaineSelect = document.getElementById("domaine");
+  const analyzeBtn = document.getElementById("analyze-btn");
+
+  function updateValidity() {
+    const valid = serieSelect.value && subjectsAC.getValues().length > 0 && selectedTraits.length > 0 && interestsAC.getValues().length > 0;
+    analyzeBtn.disabled = !valid;
+  }
+  serieSelect.addEventListener("change", updateValidity);
+  subjectsAC.onChange(updateValidity);
+  interestsAC.onChange(updateValidity);
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    if (!p) return;
+    serieSelect.value = p.serie;
+    subjectsAC.setValues(p.subjects);
+    interestsAC.setValues(p.interests);
+    domaineSelect.value = p.domaine || "";
+    selectedTraits = p.traits.slice();
+    traitsField.querySelectorAll(".trait-chip").forEach((btn) => {
+      btn.classList.toggle("selected", selectedTraits.includes(btn.dataset.value));
+    });
+    updateValidity();
+  }
+  document.querySelectorAll(".preset-card").forEach((card) => {
+    card.addEventListener("click", () => applyPreset(card.dataset.preset));
+  });
+
+  // ================= App state / chat =================
+  let sessionId = null;
+
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const sessionTag = document.getElementById("session-tag");
+  const newChatBtn = document.getElementById("new-chat-btn");
+  const contentEl = document.getElementById("content");
+  const welcome = document.getElementById("welcome");
+  const chatContainer = document.getElementById("chat-container");
+  const composerWrap = document.getElementById("composer-wrap");
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("send-btn");
+  const profileOverlay = document.getElementById("profile-overlay");
+  const profileForm = document.getElementById("profile-form");
+
+  function renderMarkdown(text) {
+    let html = escapeHtml(text);
+    html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+    html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "<em>$1</em>");
+
+    const blocks = html.split(/\n{2,}/).map((b) => b.replace(/\n/g, " ").trim()).filter(Boolean);
+    const blockKind = (b) => {
+      if (/^#{1,3}\s+/.test(b)) return "h";
+      if (/^\d+\.\s+/.test(b)) return "ol";
+      if (/^[-*]\s+/.test(b)) return "ul";
+      return "p";
+    };
+
+    const out = [];
+    let listType = null;
+    let itemOpen = false;
+    let itemHasParagraph = false;
+    const closeItem = () => { if (itemOpen) { out.push("</li>"); itemOpen = false; } };
+    const closeList = () => { closeItem(); if (listType) { out.push(`</${listType}>`); listType = null; } };
+
+    for (const block of blocks) {
+      const kind = blockKind(block);
+      if (kind === "h") {
+        closeList();
+        const level = Math.min(3, block.match(/^#+/)[0].length);
+        out.push(`<h${level}>${block.replace(/^#{1,3}\s+/, "")}</h${level}>`);
+      } else if (kind === "ol" || kind === "ul") {
+        const content = block.replace(/^(?:\d+\.|[-*])\s+/, "");
+        if (listType !== kind) { closeList(); out.push(`<${kind}>`); listType = kind; }
+        else { closeItem(); }
+        out.push(`<li>${content}`);
+        itemOpen = true;
+        itemHasParagraph = false;
+      } else if (listType && itemOpen && !itemHasParagraph) {
+        out.push(`<p>${block}</p>`);
+        itemHasParagraph = true;
+      } else {
+        closeList();
+        out.push(`<p>${block}</p>`);
+      }
+    }
+    closeList();
+    return out.join("");
+  }
+
+  function addMessageRow(role, { text = "", markdown = false, pending = false } = {}) {
+    const row = document.createElement("div");
+    row.className = "message-row " + role;
+
+    const body = document.createElement("div");
+    body.className = "message";
+
+    if (role === "assistant") {
+      const avatar = document.createElement("div");
+      avatar.className = "message-avatar";
+      avatar.innerHTML = '<img src="/logo.png" alt="ISPM">';
+      const roleLabel = document.createElement("div");
+      roleLabel.className = "message-role";
+      roleLabel.textContent = "ORIENT'IA";
+      body.appendChild(roleLabel);
+      row.append(avatar, body);
+    } else {
+      row.append(body);
+    }
+
+    const content = document.createElement("div");
+    content.className = "message-content";
+    if (pending) {
+      content.innerHTML = '<span class="typing"><span class="typing-dots"><span></span><span></span><span></span></span><span>ORIENT\'IA réfléchit…</span></span>';
+    } else if (markdown) {
+      content.innerHTML = renderMarkdown(text);
+    } else {
+      content.textContent = text;
+    }
+    body.appendChild(content);
+
+    chatContainer.appendChild(row);
+    contentEl.scrollTop = contentEl.scrollHeight;
+    return content;
+  }
+
+  const SEND_ICON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  let chatBusy = false;
+
+  function updateSendButtonState() {
+    const hasText = chatInput.value.trim().length > 0;
+    sendBtn.classList.toggle("enabled", hasText && !chatBusy);
+  }
+
+  function setBusy(busy) {
+    chatBusy = busy;
+    chatInput.disabled = busy;
+    sendBtn.disabled = busy;
+    sendBtn.innerHTML = busy ? '<span class="spinner"></span>' : SEND_ICON;
+    updateSendButtonState();
+  }
+
+  async function postJSON(url, body) {
+    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`${res.status} — ${await res.text()}`);
+    return res.json();
+  }
+
+  function autoResize() {
+    chatInput.style.height = "auto";
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + "px";
+  }
+  chatInput.addEventListener("input", () => { autoResize(); updateSendButtonState(); });
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); chatForm.requestSubmit(); }
+  });
+  updateSendButtonState();
+
+  function openChat(firstReply) {
+    setProfileLoading(false);
+    profileOverlay.hidden = true;
+    welcome.hidden = true;
+    chatContainer.hidden = false;
+    composerWrap.hidden = false;
+    sessionTag.textContent = "Session " + sessionId;
+    addMessageRow("assistant", { text: firstReply, markdown: true });
+    chatInput.focus();
+  }
+
+  function resetAll() {
+    sessionId = null;
+    chatContainer.innerHTML = "";
+    chatContainer.hidden = true;
+    composerWrap.hidden = true;
+    welcome.hidden = false;
+    sessionTag.textContent = "Aucune session active";
+    profileOverlay.hidden = false;
+    profileError.hidden = true;
+    closeSidebarMobile();
+  }
+
+  const ANALYZE_BTN_DEFAULT = analyzeBtn.innerHTML;
+  const profileError = document.getElementById("profile-error");
+
+  function setProfileLoading(loading) {
+    profileForm.classList.toggle("form-disabled", loading);
+    analyzeBtn.classList.toggle("loading", loading);
+    analyzeBtn.disabled = loading;
+    analyzeBtn.innerHTML = loading
+      ? '<span class="spinner"></span><span>Analyse de ton profil…</span>'
+      : ANALYZE_BTN_DEFAULT;
+  }
+
+  profileForm.addEventListener("submit", (e) => e.preventDefault());
+  document.getElementById("analyze-btn").addEventListener("click", async () => {
+    if (analyzeBtn.disabled) return;
+    const domaine = domaineSelect.value;
+    let interets = interestsAC.getValues().join(", ");
+    if (domaine) interets += (interets ? "; " : "") + "domaine souhaité : " + domaine;
+
+    const payload = {
+      serie_bac: serieSelect.value,
+      matiere_preferee: subjectsAC.getValues().join(", "),
+      interets,
+      traits_personnalite: selectedTraits.slice(),
+    };
+
+    profileError.hidden = true;
+    setProfileLoading(true);
+    try {
+      const data = await postJSON("/sessions", payload);
+      sessionId = data.session_id;
+      openChat(data.reply);
+    } catch (err) {
+      setProfileLoading(false);
+      profileError.textContent = "Erreur au démarrage de la session : " + err.message;
+      profileError.hidden = false;
+    }
+  });
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text || !sessionId || chatBusy) return;
+
+    addMessageRow("user", { text });
+    chatInput.value = "";
+    autoResize();
+    const pendingContent = addMessageRow("assistant", { pending: true });
+
+    setBusy(true);
+    try {
+      const data = await postJSON(`/sessions/${sessionId}/messages`, { message: text });
+      pendingContent.innerHTML = renderMarkdown(data.reply);
+    } catch (err) {
+      pendingContent.textContent = "Erreur : " + err.message;
+    } finally {
+      contentEl.scrollTop = contentEl.scrollHeight;
+      setBusy(false);
+      chatInput.focus();
+    }
+  });
+
+  newChatBtn.addEventListener("click", resetAll);
+
+  function closeSidebarMobile() {
+    if (window.innerWidth <= 760) { sidebar.classList.add("hide"); sidebarOverlay.style.display = "none"; }
+  }
+  sidebarToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("hide");
+    if (window.innerWidth <= 760) {
+      sidebarOverlay.style.display = sidebar.classList.contains("hide") ? "none" : "block";
+    }
+  });
+  sidebarOverlay.addEventListener("click", () => { sidebar.classList.add("hide"); sidebarOverlay.style.display = "none"; });
+</script>
+</body>
+</html>

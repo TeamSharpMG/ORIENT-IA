@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-08-27T11:41:48.240220",
+  "pipeline_weights": {
+    "w_content": 0.4,
+    "w_riasec": 0.6
+  },
+  "riasec_classifier": {
+    "method": "5-fold stratified cross-validation",
+    "n_samples": 26123,
+    "accuracy_mean": 0.522489723543161,
+    "accuracy_std": 0.0042949897939603895,
+    "macro_f1_mean": 0.28979204054333535,
+    "macro_f1_std": 0.0043429626000397745,
+    "note": "Tourisme quasi jamais détecté (342 exemples / 26123, classe trop rare)."
+  },
+  "full_pipeline": {
+    "n_samples": 149,
+    "optimistic": {
+      "method": "w_content choisi et évalué sur les mêmes 149 lignes (poids livré)",
+      "hit_rate_top1": 0.5637583892617449,
+      "hit_rate_top3": 0.8053691275167785,
+      "hit_rate_top5": 0.87248322147651
+    },
+    "honest_nested_cv": {
+      "method": "5-fold KFold, w_content choisi sur les plis d'entraînement uniquement",
+      "hit_rate_top3_mean": 0.772183908045977,
+      "hit_rate_top3_std": 0.037127682267995274,
+      "chosen_w_content_per_fold": [
+        0.6,
+        0.4,
+        0.1,
+        0.4,
+        0.4
+      ]
+    }
+  }
+}
